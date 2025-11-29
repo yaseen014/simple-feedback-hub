@@ -4,8 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
-import { Star } from 'lucide-react';
+import { Star, ArrowUpDown } from 'lucide-react';
 
 interface Feedback {
   id: string;
@@ -19,6 +20,7 @@ interface Feedback {
 const FeedbackList = () => {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortBy, setSortBy] = useState('date');
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -45,6 +47,15 @@ const FeedbackList = () => {
       setLoading(false);
     }
   };
+
+  const sortedFeedbacks = [...feedbacks].sort((a, b) => {
+    if (sortBy === 'rating-high') {
+      return b.rating - a.rating;
+    } else if (sortBy === 'rating-low') {
+      return a.rating - b.rating;
+    }
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -87,9 +98,20 @@ const FeedbackList = () => {
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-center">
           <h1 className="text-3xl font-bold">All Feedback</h1>
-          <div className="space-x-2">
+          <div className="flex flex-wrap gap-2">
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[180px]">
+                <ArrowUpDown className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date">Newest First</SelectItem>
+                <SelectItem value="rating-high">Highest Rating</SelectItem>
+                <SelectItem value="rating-low">Lowest Rating</SelectItem>
+              </SelectContent>
+            </Select>
             <Button variant="outline" onClick={() => navigate('/feedback')}>
               Submit Feedback
             </Button>
@@ -107,7 +129,7 @@ const FeedbackList = () => {
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {feedbacks.map((feedback) => (
+            {sortedFeedbacks.map((feedback) => (
               <Card key={feedback.id}>
                 <CardHeader>
                   <div className="flex justify-between items-start">
