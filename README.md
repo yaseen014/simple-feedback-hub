@@ -8,7 +8,7 @@
 
 There are several ways of editing your application.
 
-**Use Lovable**
+**Use Lovable for vibe coding only**
 
 Simply visit the [Lovable Project](https://lovable.dev/projects/48440208-8787-4ce6-a6d7-cb972079caef) and start prompting.
 
